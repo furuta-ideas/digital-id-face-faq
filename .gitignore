@@ -1,0 +1,4 @@
+.claude/settings.local.json
+*.BAK
+Thumbs.db
+.DS_Store
