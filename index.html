@@ -117,53 +117,25 @@
   }
   .iconbtn.icon-only.accent:hover { background: rgba(52, 168, 83, 0.22); }
 
-  /* ---- Language toggle ---- */
-  .lang-toggle {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    display: inline-flex;
-    background: rgba(255,255,255,0.92);
-    border-radius: 999px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.18);
-    overflow: hidden;
-    user-select: none;
-  }
-  .lang-toggle button {
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: var(--text-sub);
-    font-size: .8rem;
-    font-weight: 700;
-    padding: 7px 14px;
-    cursor: pointer;
-    letter-spacing: .04em;
-    transition: background .15s, color .15s;
-  }
-  .lang-toggle button.active {
-    background: var(--blue);
-    color: #fff;
-  }
-  .lang-toggle button:not(.active):hover { background: #f1f3f4; }
-
-  /* Header/topbar lang toggle (smaller variant) */
-  .topbar .lang-toggle {
-    position: static;
-    box-shadow: none;
-    background: #f1f3f4;
-  }
-  .topbar .lang-toggle button { padding: 5px 10px; font-size: .72rem; }
-
-  /* Bilingual text helper */
-  [data-lang="en"] .jp-only { display: none; }
-  [data-lang="ja"] .en-only { display: none; }
-
   /* ---- Login screen ---- */
   #login {
     position: relative;
-    background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 50%, #e8f5e9 100%);
+    background: var(--bg);
+  }
+  #login::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('assets/bg-pc.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+  @media (max-width: 700px) {
+    #login::before {
+      background-image: url('assets/bg-mobile.jpg');
+    }
   }
   #login .container {
     position: relative;
@@ -266,10 +238,11 @@
   }
   .login-footer {
     text-align: center;
-    color: var(--text-sub);
-    font-size: .8rem;
-    font-weight: 600;
+    color: #ffffff;
+    font-size: .85rem;
+    font-weight: 700;
     padding: 4px 8px;
+    text-shadow: 0 1px 2px rgba(0,0,0,.65), 0 0 6px rgba(0,0,0,.35);
     user-select: none;
   }
 
@@ -557,99 +530,80 @@
 <div class="app" id="app">
 
   <!-- ===== Login screen ===== -->
-  <section id="login" class="screen active" aria-label="ログイン画面 / Login">
+  <section id="login" class="screen active" aria-label="ログイン画面">
     <div class="brand-hotspot" id="brandTitle" aria-hidden="true"></div>
-    <div class="lang-toggle" role="group" aria-label="Language">
-      <button type="button" data-set-lang="ja" class="active">JP</button>
-      <button type="button" data-set-lang="en">EN</button>
-    </div>
     <div class="container">
       <form class="login-card" id="loginForm" autocomplete="off">
-        <h1 class="login-title"><span class="jp-only">デジタルID×顔認証 FAQ</span><span class="en-only">Digital ID × Face Recognition FAQ</span></h1>
-        <p class="login-subtitle"><span class="jp-only">パスワードを入力してください</span><span class="en-only">Please enter the password</span></p>
-        <label for="pwInput"><span class="jp-only">パスワード</span><span class="en-only">Password</span></label>
+        <h1 class="login-title">デジタルID×顔認証 FAQ</h1>
+        <p class="login-subtitle">パスワードを入力してください</p>
+        <label for="pwInput">パスワード</label>
         <input id="pwInput" type="password" inputmode="numeric" autocomplete="off" required />
         <div class="login-error" id="loginError"></div>
-        <button type="submit" class="btn-primary" id="loginBtn"><span class="jp-only">ログイン</span><span class="en-only">Log in</span></button>
+        <button type="submit" class="btn-primary" id="loginBtn">ログイン</button>
       </form>
       <div class="login-footer">20260608_顔認証FAQ_Rev15</div>
     </div>
   </section>
 
   <!-- ===== Search screen ===== -->
-  <section id="search" class="screen" aria-label="キーワード入力画面 / Search">
+  <section id="search" class="screen" aria-label="キーワード入力画面">
     <div class="topbar">
-      <button class="iconbtn icon-only danger" id="exitBtn1" aria-label="終了 / Exit" title="アプリを終了 / Exit">✕</button>
+      <button class="iconbtn icon-only danger" id="exitBtn1" aria-label="終了" title="アプリを終了">✕</button>
       <div class="spacer"></div>
-      <h1><span class="jp-only">デジタルID×顔認証 FAQ</span><span class="en-only">Digital ID × Face Recognition FAQ</span></h1>
+      <h1>デジタルID×顔認証 FAQ</h1>
       <div class="spacer"></div>
-      <div class="lang-toggle" role="group" aria-label="Language">
-        <button type="button" data-set-lang="ja" class="active">JP</button>
-        <button type="button" data-set-lang="en">EN</button>
-      </div>
-      <button class="iconbtn icon-only accent" id="menuBtn" aria-label="意見の送信 / Send feedback" title="意見の送信 / Send feedback">✉</button>
+      <button class="iconbtn icon-only accent" id="menuBtn" aria-label="意見の送信" title="意見の送信">✉</button>
     </div>
     <div class="container">
       <div class="search-wrap">
         <form id="searchForm" autocomplete="off">
           <div class="search-input-row">
-            <input id="kwInput" type="text" placeholder="" data-ph-jp="キーワードを入力（半角スペースでAND検索）" data-ph-en="Keywords (space-separated = AND search)" autocomplete="off" enterkeyhint="search" />
-            <button type="button" class="micbtn" id="micBtn" title="音声入力 / Voice input">🎤</button>
+            <input id="kwInput" type="text" placeholder="キーワードを入力（半角スペースでAND検索）" autocomplete="off" enterkeyhint="search" />
+            <button type="button" class="micbtn" id="micBtn" title="音声入力">🎤</button>
           </div>
           <div class="search-btn-row">
-            <button type="submit" class="btn-primary"><span class="jp-only">🔍 検索</span><span class="en-only">🔍 Search</span></button>
+            <button type="submit" class="btn-primary">🔍 検索</button>
           </div>
         </form>
         <p class="hint">
-          <span class="jp-only">入力例：<b>顔認証</b> / <b>本人確認</b> / <b>KPASクラウド</b> / <b>VeriMe</b> / <b>顔認証 精度</b>（AND検索）<br />※類義語（例：顔認識↔顔認証、身元確認↔本人確認）にも自動対応</span>
-          <span class="en-only">Examples: <b>face recognition</b> / <b>identity verification</b> / <b>KPAS Cloud</b> / <b>VeriMe</b> / <b>face accuracy</b> (AND)<br />※Synonyms (e.g., 顔認識↔顔認証, KYC↔身元確認) are auto-expanded</span>
+          入力例：<b>顔認証</b> / <b>本人確認</b> / <b>KPASクラウド</b> / <b>VeriMe</b> / <b>顔認証 精度</b>（AND検索）<br />※類義語（例：顔認識↔顔認証、身元確認↔本人確認）にも自動対応
         </p>
       </div>
       <div class="footer">
-        <span class="jp-only">
-          キーボード入力 または マイク🎤での音声入力（日本語）に対応<br />
-          Enterキー または「🔍 検索」ボタンで実行
-        </span>
-        <span class="en-only">
-          Keyboard or mic 🎤 voice input (Japanese) supported<br />
-          Press Enter or tap the search button
-        </span>
+        キーボード入力 または マイク🎤での音声入力（日本語）に対応<br />
+        Enterキー または「🔍 検索」ボタンで実行
       </div>
     </div>
   </section>
 
   <!-- ===== Results screen ===== -->
-  <section id="results" class="screen" aria-label="検索結果画面 / Results">
+  <section id="results" class="screen" aria-label="検索結果画面">
     <div class="topbar">
-      <button class="iconbtn icon-only danger" id="exitBtn2" aria-label="終了 / Exit" title="アプリを終了 / Exit">✕</button>
+      <button class="iconbtn icon-only danger" id="exitBtn2" aria-label="終了" title="アプリを終了">✕</button>
       <div class="spacer"></div>
-      <h1><span class="jp-only">検索結果</span><span class="en-only">Results</span></h1>
+      <h1>検索結果</h1>
       <div class="spacer"></div>
-      <div class="lang-toggle" role="group" aria-label="Language">
-        <button type="button" data-set-lang="ja" class="active">JP</button>
-        <button type="button" data-set-lang="en">EN</button>
-      </div>
-      <button class="iconbtn icon-only accent" id="menuBtn2" aria-label="意見の送信 / Send feedback" title="意見の送信 / Send feedback">✉</button>
+      <button class="iconbtn icon-only accent" id="menuBtn2" aria-label="意見の送信" title="意見の送信">✉</button>
     </div>
     <div class="container" id="resultsContainer">
       <div class="results-search-wrap">
         <form id="resultsSearchForm" autocomplete="off">
           <div class="search-input-row compact">
-            <input id="kwInput2" type="text" placeholder="" data-ph-jp="キーワードを再入力（半角スペースでAND検索）" data-ph-en="Refine search (space-separated = AND)" autocomplete="off" enterkeyhint="search" />
-            <button type="submit" class="iconbtn icon-only primary" title="検索 / Search" aria-label="検索 / Search">🔍</button>
+            <input id="kwInput2" type="text" placeholder="キーワードを再入力（半角スペースでAND検索）" autocomplete="off" enterkeyhint="search" />
+            <button type="submit" class="iconbtn icon-only primary" title="検索" aria-label="検索">🔍</button>
           </div>
         </form>
       </div>
       <div class="results-header">
         <div class="results-meta">
-          <div class="label"><span class="jp-only">検索キーワード</span><span class="en-only">Search keyword</span></div>
+          <div class="label">検索キーワード</div>
           <div class="kw" id="resKw"></div>
         </div>
         <div class="results-count" id="resCount"></div>
       </div>
       <div class="card-list" id="cardList"></div>
       <div class="more-row" id="moreRow" style="display:none">
-        <button class="btn-secondary" id="moreBtn"><span class="jp-only">他の質問を見る ↓</span><span class="en-only">More questions ↓</span></button>
+        <button class="btn-secondary" id="moreBtn">他の質問を見る ↓</button>
       </div>
     </div>
   </section>
@@ -657,10 +611,9 @@
   <!-- ===== Modals ===== -->
   <div class="modal-backdrop" id="betaModal" data-no-backdrop-close>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="betaTitle">
-      <h2 id="betaTitle" class="beta-title"><span class="jp-only">⚠ ベータテスト版のお知らせ</span><span class="en-only">⚠ Beta Notice</span></h2>
+      <h2 id="betaTitle" class="beta-title">⚠ ベータテスト版のお知らせ</h2>
       <p class="beta-notice">
-        <span class="jp-only">このアプリは、現在ベータテスト版です。<br />ご使用中に間違い・追加要望のご意見が<br />あった場合、右上の管理者メニューから<br />意見の送信ボタンを押して<br />メッセージをお送りください。</span>
-        <span class="en-only">This app is currently in beta.<br />If you find any errors or have requests during use,<br />please tap the admin menu (top right) and use<br />the "Send feedback" button to message us.</span>
+        このアプリは、現在ベータテスト版です。<br />ご使用中に間違い・追加要望のご意見が<br />あった場合、右上の管理者メニューから<br />意見の送信ボタンを押して<br />メッセージをお送りください。
       </p>
       <div class="modal-actions">
         <button class="btn-primary" id="betaOkBtn">OK</button>
@@ -670,11 +623,11 @@
 
   <div class="modal-backdrop" id="exitModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
-      <h2 id="exitTitle"><span class="jp-only">アプリを終了しますか？</span><span class="en-only">Exit the app?</span></h2>
-      <p><span class="jp-only">このタブを閉じてキーワード検索を終了します。</span><span class="en-only">Close this tab and end the keyword search.</span></p>
+      <h2 id="exitTitle">アプリを終了しますか？</h2>
+      <p>このタブを閉じてキーワード検索を終了します。</p>
       <div class="modal-actions">
-        <button class="iconbtn" data-modal-close><span class="jp-only">キャンセル</span><span class="en-only">Cancel</span></button>
-        <button class="btn-primary" id="exitConfirmBtn" style="background:var(--red)"><span class="jp-only">終了する</span><span class="en-only">Exit</span></button>
+        <button class="iconbtn" data-modal-close>キャンセル</button>
+        <button class="btn-primary" id="exitConfirmBtn" style="background:var(--red)">終了する</button>
       </div>
     </div>
   </div>
@@ -698,79 +651,32 @@
   const STORAGE_KEYS = {
     pwHash: 'difaq.pwHash',
     failCount: 'difaq.failCount',
-    lockUntil: 'difaq.lockUntil',
-    lang: 'difaq.lang'
+    lockUntil: 'difaq.lockUntil'
   };
   const MAX_FAILS = 3;
   const LOCKOUT_MS = 30 * 1000;
   const PAGE_SIZE = 4;
 
-  /* ---- Language state ---- */
-  let currentLang = (localStorage.getItem(STORAGE_KEYS.lang) === 'en') ? 'en' : 'ja';
-
+  /* ---- UI strings (JP only) ---- */
   const I18N = {
-    ja: {
-      noResultsTitle: '該当する質問が見つかりませんでした',
-      noResultsHint: 'キーワードを変えてもう一度お試しください。',
-      countTpl: '候補 {total} 件中 {start}〜{end} 件目を表示',
-      noAnswer: '回答情報が登録されていません。',
-      pwRequired: 'パスワードを入力してください。',
-      pwWrong: (n, max) => `パスワードが違います（${n}/${max}）。`,
-      pwLockTpl: (sec) => `ロックアウト中です。あと ${sec} 秒お待ちください。`,
-      pwLockedNotice: (max) => `${max}回連続で失敗しました。30秒間ロックアウトされます。`,
-      adminCurWrong: '現パスワードが違います。',
-      adminTooShort: '新パスワードは4文字以上で入力してください。',
-      adminMismatch: '新パスワード（確認）が一致しません。',
-      adminChanged: 'パスワードを変更しました。',
-      voiceUnsupported: 'このブラウザは音声入力に対応していません。Chrome、Safari、Edgeをご利用ください。',
-      enFallback: ''
-    },
-    en: {
-      noResultsTitle: 'No matching questions found',
-      noResultsHint: 'Please try a different keyword.',
-      countTpl: 'Showing {start}-{end} of {total} matches',
-      noAnswer: 'No answer registered for this entry.',
-      pwRequired: 'Please enter the password.',
-      pwWrong: (n, max) => `Incorrect password (${n}/${max}).`,
-      pwLockTpl: (sec) => `Locked out. Please wait ${sec} seconds.`,
-      pwLockedNotice: (max) => `${max} consecutive failures. Locked out for 30 seconds.`,
-      adminCurWrong: 'Current password is incorrect.',
-      adminTooShort: 'New password must be at least 4 characters.',
-      adminMismatch: 'New password confirmation does not match.',
-      adminChanged: 'Password changed.',
-      voiceUnsupported: 'Voice input is not supported in this browser. Please use Chrome, Safari, or Edge.',
-      enFallback: '⚠ English version not yet available — showing Japanese.'
-    }
+    noResultsTitle: '該当する質問が見つかりませんでした',
+    noResultsHint: 'キーワードを変えてもう一度お試しください。',
+    countTpl: '候補 {total} 件中 {start}〜{end} 件目を表示',
+    noAnswer: '回答情報が登録されていません。',
+    pwRequired: 'パスワードを入力してください。',
+    pwWrong: (n, max) => `パスワードが違います（${n}/${max}）。`,
+    pwLockTpl: (sec) => `ロックアウト中です。あと ${sec} 秒お待ちください。`,
+    pwLockedNotice: (max) => `${max}回連続で失敗しました。30秒間ロックアウトされます。`,
+    adminCurWrong: '現パスワードが違います。',
+    adminTooShort: '新パスワードは4文字以上で入力してください。',
+    adminMismatch: '新パスワード（確認）が一致しません。',
+    adminChanged: 'パスワードを変更しました。',
+    voiceUnsupported: 'このブラウザは音声入力に対応していません。Chrome、Safari、Edgeをご利用ください。'
   };
 
   function t(key, ...args) {
-    const v = I18N[currentLang][key] ?? I18N.ja[key];
+    const v = I18N[key];
     return (typeof v === 'function') ? v(...args) : v;
-  }
-
-  function applyLang() {
-    document.documentElement.setAttribute('data-lang', currentLang);
-    document.documentElement.lang = currentLang;
-    // Placeholders
-    document.querySelectorAll('[data-ph-jp]').forEach(el => {
-      el.placeholder = el.getAttribute(currentLang === 'en' ? 'data-ph-en' : 'data-ph-jp') || '';
-    });
-    // Toggle button states
-    document.querySelectorAll('.lang-toggle button').forEach(b => {
-      b.classList.toggle('active', b.getAttribute('data-set-lang') === currentLang);
-    });
-    localStorage.setItem(STORAGE_KEYS.lang, currentLang);
-    // Re-render results if active
-    if (document.querySelector('.screen.active')?.id === 'results') {
-      renderResults();
-    }
-  }
-
-  function setLang(lang) {
-    if (lang !== 'ja' && lang !== 'en') return;
-    if (lang === currentLang) return;
-    currentLang = lang;
-    applyLang();
   }
 
   /* ---- Hash (simple Base64 + salt) ---- */
@@ -1053,43 +959,26 @@
       .replace(/"/g, '&quot;');
   }
 
-  function pickField(rec, jpKey, enKey) {
-    if (currentLang === 'en') {
-      const ev = rec[enKey];
-      if (ev != null && ((typeof ev === 'string' && ev.trim()) || (Array.isArray(ev) && ev.length && ev.some(x => x && String(x).trim())))) {
-        return { value: ev, fallback: false };
-      }
-      return { value: rec[jpKey], fallback: true };
-    }
-    return { value: rec[jpKey], fallback: false };
-  }
-
   function cardHTML(rec, idx) {
-    const tagsField = pickField(rec, 'tags', 'tags_en');
-    const tag = (tagsField.value && tagsField.value[0]) ? escapeHTML(tagsField.value[0]) : '';
-    const qField = pickField(rec, 'question', 'question_en');
-    const aField = pickField(rec, 'answers', 'answers_en');
-    const showFallback = (currentLang === 'en' && (qField.fallback || aField.fallback));
+    const tag = (rec.tags && rec.tags[0]) ? escapeHTML(rec.tags[0]) : '';
+    const answers = rec.answers || [];
 
-    const ans = (aField.value || []).slice(0, 3).map(a => {
+    const ans = answers.slice(0, 3).map(a => {
       const cleaned = String(a).replace(/^[●⚫・･\s]+/, '');
       return `<p class="answer"><span class="bullet">●</span>${escapeHTML(cleaned)}</p>`;
     }).join('');
-    const fallbackNotice = showFallback
-      ? `<p class="answer" style="font-size:.85rem;font-weight:500;color:var(--text-sub)">${escapeHTML(t('enFallback'))}</p>`
-      : '';
     return `
       <div class="card color-${idx % 4}" data-id="${rec.id}">
         <div class="card-head" role="button" tabindex="0" aria-expanded="false">
           <div>
-            <div class="card-title">${escapeHTML(qField.value || '')}</div>
+            <div class="card-title">${escapeHTML(rec.question || '')}</div>
             ${tag ? `<div class="card-cat">${tag}</div>` : ''}
           </div>
           <div style="flex:1"></div>
           <div class="toggle-icon">▾</div>
         </div>
         <div class="card-body">
-          <div class="card-body-inner">${fallbackNotice}${ans || `<p class="answer">${escapeHTML(t('noAnswer'))}</p>`}</div>
+          <div class="card-body-inner">${ans || `<p class="answer">${escapeHTML(t('noAnswer'))}</p>`}</div>
         </div>
       </div>`;
   }
@@ -1259,12 +1148,6 @@
     // ✉ icon on both topbars fires the feedback mailto directly.
     $('#menuBtn').addEventListener('click', sendFeedback);
     $('#menuBtn2').addEventListener('click', sendFeedback);
-
-    // Language toggle buttons
-    document.querySelectorAll('.lang-toggle button[data-set-lang]').forEach(b => {
-      b.addEventListener('click', () => setLang(b.getAttribute('data-set-lang')));
-    });
-    applyLang();
 
     // Beta-notice OK → advance to search screen (modal cannot be dismissed any other way)
     $('#betaOkBtn').addEventListener('click', () => {
