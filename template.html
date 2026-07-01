@@ -165,15 +165,6 @@
   @media (max-width: 480px) {
     .login-title { font-size: 1.35rem; }
   }
-  /* Hidden hot-spot at top of login page to trigger admin (5s long press) */
-  .brand-hotspot {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 40vh;
-    z-index: 2;
-    cursor: default;
-    -webkit-tap-highlight-color: transparent;
-  }
   .login-card {
     background: rgba(255,255,255,0.94);
     border-radius: 16px;
@@ -509,7 +500,6 @@
 
   /* ---- Responsive ---- */
   @media (max-width: 600px) {
-    .brand-title { font-size: 1.55rem; }
     .container { padding: 12px 14px 20px; }
     .topbar h1 { font-size: .95rem; }
     .search-wrap { padding: 18px 14px; }
@@ -518,7 +508,6 @@
     .iconbtn { padding: 8px 10px; font-size: .85rem; }
   }
   @media (max-width: 380px) {
-    .brand-title { font-size: 1.35rem; }
     .answer { font-size: 11.5pt; }
   }
 
@@ -531,7 +520,6 @@
 
   <!-- ===== Login screen ===== -->
   <section id="login" class="screen active" aria-label="ログイン画面">
-    <div class="brand-hotspot" id="brandTitle" aria-hidden="true"></div>
     <div class="container">
       <form class="login-card" id="loginForm" autocomplete="off">
         <h1 class="login-title">デジタルID×顔認証 FAQ</h1>
@@ -667,10 +655,6 @@
     pwWrong: (n, max) => `パスワードが違います（${n}/${max}）。`,
     pwLockTpl: (sec) => `ロックアウト中です。あと ${sec} 秒お待ちください。`,
     pwLockedNotice: (max) => `${max}回連続で失敗しました。30秒間ロックアウトされます。`,
-    adminCurWrong: '現パスワードが違います。',
-    adminTooShort: '新パスワードは4文字以上で入力してください。',
-    adminMismatch: '新パスワード（確認）が一致しません。',
-    adminChanged: 'パスワードを変更しました。',
     voiceUnsupported: 'このブラウザは音声入力に対応していません。Chrome、Safari、Edgeをご利用ください。'
   };
 
