@@ -344,12 +344,31 @@
   .hint b { color: var(--text); font-weight: 500; }
 
   /* ---- Results screen ---- */
+  .results-search-wrap {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    margin-top: 8px;
+  }
+  .search-input-row.compact {
+    padding: 2px 6px 2px 16px;
+  }
+  .search-input-row.compact input {
+    font-size: .95rem;
+    padding: 9px 0;
+  }
+  .search-input-row.compact .iconbtn.icon-only {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
   .results-header {
     background: var(--surface);
     border-radius: 16px;
     box-shadow: var(--shadow);
     padding: 16px 20px;
-    margin-top: 8px;
+    margin-top: 12px;
   }
   .results-meta {
     display: flex;
@@ -574,7 +593,7 @@
       <div class="search-wrap">
         <form id="searchForm" autocomplete="off">
           <div class="search-input-row">
-            <input id="kwInput" type="text" placeholder="" data-ph-jp="キーワードを入力（例：顔認証）" data-ph-en="Enter a keyword (e.g., face recognition)" autocomplete="off" enterkeyhint="search" />
+            <input id="kwInput" type="text" placeholder="" data-ph-jp="キーワードを入力（半角スペースでAND検索）" data-ph-en="Keywords (space-separated = AND search)" autocomplete="off" enterkeyhint="search" />
             <button type="button" class="micbtn" id="micBtn" title="音声入力 / Voice input">🎤</button>
           </div>
           <div class="search-btn-row">
@@ -582,8 +601,8 @@
           </div>
         </form>
         <p class="hint">
-          <span class="jp-only">入力例：<b>顔認証</b> / <b>本人確認</b> / <b>KPASクラウド</b> / <b>VeriMe</b> / <b>個人情報</b></span>
-          <span class="en-only">Examples: <b>face recognition</b> / <b>identity verification</b> / <b>KPAS Cloud</b> / <b>VeriMe</b> / <b>personal information</b></span>
+          <span class="jp-only">入力例：<b>顔認証</b> / <b>本人確認</b> / <b>KPASクラウド</b> / <b>VeriMe</b> / <b>顔認証 精度</b>（AND検索）<br />※類義語（例：顔認識↔顔認証、身元確認↔本人確認）にも自動対応</span>
+          <span class="en-only">Examples: <b>face recognition</b> / <b>identity verification</b> / <b>KPAS Cloud</b> / <b>VeriMe</b> / <b>face accuracy</b> (AND)<br />※Synonyms (e.g., 顔認識↔顔認証, KYC↔身元確認) are auto-expanded</span>
         </p>
       </div>
       <div class="footer">
@@ -610,9 +629,17 @@
         <button type="button" data-set-lang="ja" class="active">JP</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-      <button class="iconbtn icon-only primary" id="backBtn" aria-label="戻る / Back" title="検索画面に戻る / Back">←</button>
+      <button class="iconbtn icon-only accent" id="menuBtn2" aria-label="意見の送信 / Send feedback" title="意見の送信 / Send feedback">✉</button>
     </div>
     <div class="container" id="resultsContainer">
+      <div class="results-search-wrap">
+        <form id="resultsSearchForm" autocomplete="off">
+          <div class="search-input-row compact">
+            <input id="kwInput2" type="text" placeholder="" data-ph-jp="キーワードを再入力（半角スペースでAND検索）" data-ph-en="Refine search (space-separated = AND)" autocomplete="off" enterkeyhint="search" />
+            <button type="submit" class="iconbtn icon-only primary" title="検索 / Search" aria-label="検索 / Search">🔍</button>
+          </div>
+        </form>
+      </div>
       <div class="results-header">
         <div class="results-meta">
           <div class="label"><span class="jp-only">検索キーワード</span><span class="en-only">Search keyword</span></div>
@@ -782,49 +809,130 @@
     return s;
   }
 
-  /* ---- Scoring search ---- */
-  function tokenize(q) {
-    const norm = normalize(q);
-    if (!norm) return [];
-    // split on Japanese particles and punctuation, keep meaningful chunks
-    const parts = norm.split(/[\s、。,.\/\\?？!！「」（）()\[\]\-_=+*&%$#@~"'｜\|・]+/).filter(Boolean);
-    // Also include the whole normalized query
-    const set = new Set(parts);
-    set.add(norm);
-    return [...set].filter(t => t.length >= 1);
+  /* ---- Synonym dictionary ----
+     Each group is a bag of equivalent terms. When any token in a group is typed,
+     it is expanded to all other members before scoring. Terms are auto-normalized
+     (half-width / lowercase / katakana→hiragana) so entries can be written natural. */
+  const SYNONYM_GROUPS_RAW = [
+    ['顔認証', '顔認識', 'フェイス認証', 'フェイス認識', 'face', 'facial', 'facerecognition'],
+    ['本人確認', '身元確認', '本人認証', 'kyc', 'ekyc', 'アイデンティティ検証', 'identityverification'],
+    ['個人情報', 'プライバシー', '個人データ', 'パーソナルデータ', 'privacy'],
+    ['カメラ', 'イメージセンサー', 'ビデオカメラ', 'camera'],
+    ['スマホ', 'スマートフォン', 'モバイル', '携帯', '携帯電話', 'smartphone', 'mobile'],
+    ['マイナンバー', 'マイナ', 'マイナンバーカード', 'mynumber'],
+    ['クラウド', 'saas', 'オンライン', 'cloud'],
+    ['sdk', '開発キット', 'ソフトウェア開発キット'],
+    ['費用', '料金', '価格', 'コスト', 'price', 'cost'],
+    ['精度', '認識率', '正確性', '正確度', 'accuracy'],
+    ['認証', '認識', 'authentication'],
+    ['端末', 'デバイス', '機器', 'ハードウェア', 'hardware', 'device'],
+    ['ゲート', '改札', 'gate'],
+    ['万博', 'expo', 'エキスポ', '大阪関西万博', '大阪万博'],
+    ['技術', 'テクノロジー', 'technology', 'tech'],
+    ['シェア', '市場シェア', 'マーケットシェア', 'marketshare'],
+    ['セキュリティ', '安全性', 'security'],
+    ['ai', '人工知能', '機械学習', 'ml', 'machinelearning'],
+    ['なりすまし', 'スプーフィング', 'spoofing'],
+    ['生体認証', 'バイオメトリクス', 'biometric', 'biometrics'],
+    ['デジタル', 'digital'],
+    ['パスワード', 'pw', 'password'],
+    ['シンガポール', 'singapore'],
+    ['警察', 'police'],
+    ['kpas', 'ケーパス'],
+    ['verime', 'ベリミー', 'ヴェリミー'],
+    ['api', 'エーピーアイ'],
+    ['販売', '販路', '商流', '代理店', 'sales', 'channel'],
+    ['申込', '申し込み', '契約', 'contract', 'signup'],
+    ['サポート', '保守', 'メンテナンス', 'support', 'maintenance'],
+    ['個人', 'パーソナル', 'personal'],
+    ['金融', 'ファイナンス', 'finance', 'financial'],
+    ['行政', '自治体', '公共', 'government', 'public'],
+    ['病院', '医療', 'クリニック', 'hospital', 'medical'],
+    ['薬局', '調剤', 'pharmacy'],
+    ['実績', '事例', 'ケース', 'usecase', 'casestudy'],
+    ['機能', '仕様', 'spec', 'feature'],
+    ['連携', '統合', '接続', 'integration'],
+  ];
+  const SYNONYM_GROUPS = SYNONYM_GROUPS_RAW.map(g => {
+    const s = new Set();
+    for (const t of g) {
+      const n = normalize(t);
+      if (n) s.add(n);
+    }
+    return [...s];
+  }).filter(g => g.length > 1);
+
+  function expandSynonyms(token) {
+    const variants = new Set([token]);
+    for (const g of SYNONYM_GROUPS) {
+      if (g.includes(token)) {
+        for (const s of g) variants.add(s);
+      }
+    }
+    return [...variants];
   }
 
-  function score(rec, tokens, rawNorm) {
-    if (!tokens.length) return 0;
+  /* ---- Scoring search ----
+     Rules:
+       - Split the query on whitespace (half-width + full-width) into tokens
+       - Each token is expanded via SYNONYM_GROUPS
+       - AND semantics: every original token must match some field (via any of its
+         synonym variants); otherwise the record is discarded
+       - Whole-query boost applies only for a single-token query */
+  function tokenize(q) {
+    if (!q) return [];
+    const rawParts = String(q).split(/[\s　]+/).filter(Boolean);
+    const seen = new Set();
+    const out = [];
+    for (const p of rawParts) {
+      const n = normalize(p);
+      if (n && !seen.has(n)) {
+        seen.add(n);
+        out.push(n);
+      }
+    }
+    return out;
+  }
+
+  function scoreVariant(v, kwNorm, qNorm, tagNorm, aNorm) {
     let s = 0;
-    // Search both JA and EN fields so EN-typed keywords also match
+    if (kwNorm.some(k => k === v)) s += 10;
+    else if (kwNorm.some(k => k && k.indexOf(v) >= 0)) s += 6;
+    if (qNorm.indexOf(v) >= 0) s += 5;
+    if (tagNorm.some(tg => tg && tg.indexOf(v) >= 0)) s += 3;
+    if (aNorm.some(a => a && a.indexOf(v) >= 0)) s += 1;
+    return s;
+  }
+
+  function score(rec, expandedTokens, rawNorm, isSingleToken) {
+    if (!expandedTokens.length) return 0;
     const qNorm = normalize((rec.question || '') + ' ' + (rec.question_en || ''));
     const tagNorm = ([...(rec.tags || []), ...(rec.tags_en || [])]).map(normalize);
     const kwNorm = ([...(rec.keywords || []), ...(rec.keywords_en || [])]).map(normalize);
     const aNorm = ([...(rec.answers || []), ...(rec.answers_en || [])]).map(normalize);
 
-    for (const t of tokens) {
-      if (!t) continue;
-      // Exact match against any keyword
-      if (kwNorm.some(k => k === t)) s += 10;
-      // Partial match against keyword
-      else if (kwNorm.some(k => k && k.indexOf(t) >= 0)) s += 6;
-      // Partial in question
-      if (qNorm.indexOf(t) >= 0) s += 5;
-      // Tag match (partial)
-      if (tagNorm.some(tg => tg && tg.indexOf(t) >= 0)) s += 3;
-      // Answer partial
-      if (aNorm.some(a => a && a.indexOf(t) >= 0)) s += 1;
+    let total = 0;
+    for (const variants of expandedTokens) {
+      let best = 0;
+      for (const v of variants) {
+        const s = scoreVariant(v, kwNorm, qNorm, tagNorm, aNorm);
+        if (s > best) best = s;
+      }
+      if (best === 0) return 0; // AND semantics — one missing token drops the record
+      total += best;
     }
-    // Whole-query boost
-    if (rawNorm && qNorm.indexOf(rawNorm) >= 0) s += 4;
-    return s;
+    // Whole-query boost — only meaningful when the user typed a single token
+    if (isSingleToken && rawNorm && qNorm.indexOf(rawNorm) >= 0) total += 4;
+    return total;
   }
 
   function search(query) {
     const tokens = tokenize(query);
+    if (!tokens.length) return [];
+    const expandedTokens = tokens.map(expandSynonyms);
     const rawNorm = normalize(query);
-    const scored = FAQ_DB.map(rec => ({ rec, s: score(rec, tokens, rawNorm) }))
+    const isSingleToken = tokens.length === 1;
+    const scored = FAQ_DB.map(rec => ({ rec, s: score(rec, expandedTokens, rawNorm, isSingleToken) }))
                          .filter(o => o.s > 0)
                          .sort((a, b) => b.s - a.s || a.rec.id - b.rec.id);
     return scored.map(o => o.rec);
@@ -898,16 +1006,20 @@
   let lastQuery = '';
   let pageIndex = 0;
 
-  function runSearch(e) {
+  function runSearch(e, sourceSel) {
     e && e.preventDefault();
-    const q = ($('#kwInput').value || '').trim();
+    const src = sourceSel || '#kwInput';
+    const q = ($(src).value || '').trim();
     if (!q) {
-      $('#kwInput').focus();
+      $(src).focus();
       return;
     }
     lastQuery = q;
     lastResults = search(q);
     pageIndex = 0;
+    // Keep both search inputs in sync so returning to either screen shows the same query
+    $('#kwInput').value = q;
+    $('#kwInput2').value = q;
     renderResults();
     show('results');
   }
@@ -1137,15 +1249,16 @@
     if (until && Date.now() < until) startLockoutCountdown(until);
 
     $('#loginForm').addEventListener('submit', loginAttempt);
-    $('#searchForm').addEventListener('submit', runSearch);
-    $('#backBtn').addEventListener('click', () => { show('search'); setTimeout(() => $('#kwInput').focus(), 50); });
+    $('#searchForm').addEventListener('submit', (e) => runSearch(e, '#kwInput'));
+    $('#resultsSearchForm').addEventListener('submit', (e) => runSearch(e, '#kwInput2'));
     $('#moreBtn').addEventListener('click', showMore);
     setupVoice();
     bindExit();
     bindModals();
 
-    // ✉ icon in the search topbar fires the feedback mailto directly.
+    // ✉ icon on both topbars fires the feedback mailto directly.
     $('#menuBtn').addEventListener('click', sendFeedback);
+    $('#menuBtn2').addEventListener('click', sendFeedback);
 
     // Language toggle buttons
     document.querySelectorAll('.lang-toggle button[data-set-lang]').forEach(b => {
